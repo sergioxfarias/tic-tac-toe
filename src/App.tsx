@@ -10,28 +10,32 @@ const WINNER_COMPS = [
   [0, 4, 8],
   [2, 4, 6],
 ];
-
 const GRID = Array.from(Array(9).keys());
 
 function App() {
   const [player, setPlayer] = useState<"X" | "O">("X");
-  const [plays, setPlays] = useState<Map<number, "X" | "O">>(() => new Map());
+  const [plays, setPlays] = useState<Map<number, "X" | "O">>(new Map());
 
   function handleClick(cell: number) {
-    if (plays[cell]) return;
+    if (plays.has(cell)) return;
 
-    const draft = {...plays, [cell]: player};
+    const draft = new Map(plays);
 
-    const winner = WINNER_COMPS.find((comp) => comp.every((cell) => draft[cell] === player))
+    draft.set(cell, player);
+
+    const winner = WINNER_COMPS.find((comp) => comp.every((cell) => draft.get(cell) === player))
+
+    setPlays(draft);
 
     if (winner) {
-      alert("Winner: " + player);
-      setPlays({});
+      setTimeout(() => {
+        alert(`${player} wins!`);
+        setPlays(new Map());
+      }, 100);
 
       return;
     }
 
-    setPlays(draft);
     setPlayer((prevPlayer) => (prevPlayer === "X" ? "O" : "X"));
   }
 
@@ -39,7 +43,7 @@ function App() {
     <main>
       {GRID.map((i) => (
         <button key={i} onClick={() => handleClick(i)}>
-          {plays[i]}
+          {plays.get(i)}
         </button>
       ))}
     </main>
